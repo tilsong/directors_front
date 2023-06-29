@@ -3,9 +3,13 @@ import apiClient from '../api';
 
 const store = createStore({
   state: {
-    directorList: null,
+    directorList: [],
+    loading: false,
   },
   mutations: {
+    setLoading(state, isLoading) {
+      state.loading = isLoading;
+    },
     setDirectorList(state, data) {
       const list = [];
       for (let i = 0; i < data.length; i++) {
@@ -33,12 +37,21 @@ const store = createStore({
           description,
         });
       }
+      if (state.directorList.length != 0) {
+        state.directorList = state.directorList.concat(list);
+      } else {
+        state.directorList = list;
+      }
 
-      state.directorList = list;
     },
   },
   actions: {
-    async fetchDirectorList({ commit }, requestData) {
+    async fetchDirectorList({ commit, state }, requestData) {
+      if (state.loading) {
+        return; 
+      }
+      commit('setLoading', true);
+
       try {
         const response = await apiClient.post('/user/director/list', requestData);
         const res = response.data;
@@ -59,6 +72,8 @@ const store = createStore({
         commit('setDirectorList', res);
       } catch (error) {
         console.error(error);
+      }finally {
+        commit('setLoading', false); // 로딩 상태 해제
       }
     },
   },

@@ -3,9 +3,22 @@
     <v-responsive class="align-center fill-height">
       <h3 class="text-h4 font-weight-bold text-center">디렉터 찾기</h3>
       <div class="py-5" />
+      <div class="text-center text-h5" id="filter">
+        <div>필터</div>
+        <div>
+          <!-- (로그인x -> uncheck 모드, 로그인 시 유저 지역 및 범위 정도 설정할 수 있도록 하기) -->
+          <div>지역 설정 </div>
+          <!-- 선택: 콤보 박스 사용  -->
+          <div>전문 분야 선택</div>
+          <!-- 선택: 체크 박스 사용  -->
+          <div>스케줄 유무 선택</div>
+          <!-- 선택: input form 사용  -->
+          <div>검색</div>
+        </div>
+      </div>
       
       <v-row class="d-flex align-center justify-center " cols="8">
-        <div class="item-list">
+        <div class="item-list"  ref="itemList">
           <v-col  v-for="(item, index) in directorList" :key="index">
             <div class="item-wrapper  a">
               <div class="item-content">
@@ -27,7 +40,9 @@
 </template>
 
 <style scoped>
-
+#filter {
+  border: 1px solid blue;
+}
 .specialty {
   font-size: 20px;
   font-weight: bold;
@@ -74,60 +89,46 @@
 </style>
 
 <script>
-const requestData = {
-  distance: 3,
-  property: "프로그래밍",
-  hasSchedule: false,
-  searchText: null,
-  page: 1,
-  size: 20
-};
-
 export default {
-data: () => ({
-    items: [
-      { type: 'subheader', title: 'Today' },
-      {
-        prependAvatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-        title: 'Brunch this weekend?',
-        subtitle: `<span class="text-primary">Ali Connors</span> &mdash; I'll be in your neighborhood doing errands this weekend. Do you want to hang out?`,
-      },
-      { type: 'divider', inset: true },
-      {
-        prependAvatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
-        title: 'Summer BBQ',
-        subtitle: `<span class="text-primary">to Alex, Scott, Jennifer</span> &mdash; Wish I could come, but I'm out of town this weekend.`,
-      },
-      { type: 'divider', inset: true },
-      {
-        prependAvatar: 'https://cdn.vuetifyjs.com/images/lists/3.jpg',
-        title: 'Oui oui',
-        subtitle:
-          '<span class="text-primary">Sandra Adams</span> &mdash; Do you have Paris recommendations? Have you ever been?',
-      },
-      { type: 'divider', inset: true },
-      {
-        prependAvatar: 'https://cdn.vuetifyjs.com/images/lists/4.jpg',
-        title: 'Birthday gift',
-        subtitle:
-          '<span class="text-primary">Trevor Hansen</span> &mdash; Have any ideas about what we should get Heidi for her birthday?',
-      },
-      { type: 'divider', inset: true },
-      {
-        prependAvatar: 'https://cdn.vuetifyjs.com/images/lists/5.jpg',
-        title: 'Recipe to try',
-        subtitle:
-          '<span class="text-primary">Britta Holt</span> &mdash; We should eat this: Grate, Squash, Corn, and tomatillo Tacos.',
-      },
-    ],
+  data: () => ({
+    distance: 3,
+    property: "프로그래밍",
+    hasSchedule: false,
+    searchText: null,
+    page: 1,
   }),
-
   mounted() {
     this.fetchData();
+    window.addEventListener("scroll", this.handleScroll);
+  },
+  beforeUnmount() {
+    window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
     fetchData() {
-      this.$store.dispatch('fetchDirectorList', requestData)
+      this.$store.dispatch('fetchDirectorList', {
+        "distance": this.distance,
+        "property": this.property,
+        "hasSchedule": this.hasSchedule,
+        "searchText": this.searchText,
+        "page": this.page,
+        "size": 20,
+      })
+    },
+    handleScroll() {
+      if (this.$refs.itemList) {
+        const scrollPosition = window.pageYOffset + window.innerHeight;
+        const itemListHeight = this.$refs.itemList.offsetHeight;
+
+        clearTimeout(this.scrollTimeout);
+
+        this.scrollTimeout = setTimeout(() => {
+          if (scrollPosition >= itemListHeight) {
+            this.page++;
+            this.fetchData();
+          }
+        }, 1000);
+      }
     },
   },
   computed: {
@@ -135,6 +136,9 @@ data: () => ({
       let list = this.$store.getters.getDirectorList;
       console.log('lisddddt', list)
       return Array.isArray(list) ? list : [];
+    },
+    isLoading() {
+      return this.$store.state.loading;
     },
   },
 }
