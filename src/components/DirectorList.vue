@@ -127,14 +127,9 @@ export default {
     ],
   }),
   mounted() {
-    this.env();
-    this.fetchData(); // 페이지가 로드되자마자 API 호출
+    this.fetchData();
   },
   methods: {
-    env(){
-      console.log(import.meta.env);
-      console.log(process.env);
-    },
     fetchData() {
       console.log("12356");
       apiClient.post('/user/director/list', dummyRequest)

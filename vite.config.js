@@ -20,7 +20,8 @@ export default defineConfig({
     }),
   ],
   define: { 'process.env': {
-    'VUE_APP_API_DEV_URL' : process.env.VUE_APP_API_DEV_URL
+    'VUE_APP_API_DEV_URL' : process.env.VUE_APP_API_DEV_URL,
+    'VUE_APP_TEMP_TOKEN' : process.env.VUE_APP_TEMP_TOKEN
   } },
   resolve: {
     alias: {
