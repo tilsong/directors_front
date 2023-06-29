@@ -1,95 +1,90 @@
 <template>
-    <v-container class="" >
-        <v-responsive class="align-center text-center fill-height ">
-        <h3 class="text-h4 font-weight-bold">디렉터 찾기</h3>
-
-        <div class="py-14" />
-        <v-row class="d-flex align-center justify-center">
-            <v-list
-            :items="items"
-            item-props
-            lines="three"
-            >
-                <template v-slot:subtitle="{ subtitle }">
-                    <div v-html="subtitle"></div>
-                </template>
-            </v-list>
-        </v-row>
-
-        <!-- <v-row class="d-flex align-center justify-center">
-            <v-col cols="auto">
-            <v-btn
-                href="https://vuetifyjs.com/components/all/"
-                min-width="164"
-                rel="noopener noreferrer"
-                target="_blank"
-                variant="text"
-            >
-                <v-icon
-                icon="mdi-view-dashboard"
-                size="large"
-                start
-                />
-
-                Components
-            </v-btn>
-            </v-col>
-
-            <v-col cols="auto">
-            <v-btn
-                color="primary"
-                href="https://vuetifyjs.com/introduction/why-vuetify/#feature-guides"
-                min-width="228"
-                rel="noopener noreferrer"
-                size="x-large"
-                target="_blank"
-                variant="flat"
-            >
-                <v-icon
-                icon="mdi-speedometer"
-                size="large"
-                start
-                />
-
-                Get Started
-            </v-btn>
-            </v-col>
-
-            <v-col cols="auto">
-            <v-btn
-                href="https://community.vuetifyjs.com/"
-                min-width="164"
-                rel="noopener noreferrer"
-                target="_blank"
-                variant="text"
-            >
-                <v-icon
-                icon="mdi-account-group"
-                size="large"
-                start
-                />
-
-                Community
-            </v-btn>
-            </v-col>
-        </v-row> -->
-        </v-responsive>
-    </v-container>
+  <v-container class="">
+    <v-responsive class="align-center fill-height">
+      <h3 class="text-h4 font-weight-bold text-center">디렉터 찾기</h3>
+      <div class="py-5" />
+      
+      <v-row class="d-flex align-center justify-center " cols="8">
+        <div class="item-list">
+          <v-col  v-for="(item, index) in directorList" :key="index">
+            <div class="item-wrapper  a">
+              <div class="item-content">
+                <div class="item-image">
+                  <img :src="item.image" alt="Director Image">
+                </div>
+                <div class="item-details">
+                  <div class="specialty">{{ item.specialty }}</div>
+                  <span class="text-primary">{{ item.name }}</span>
+                  &mdash; {{ item.description }}
+                </div>
+              </div>
+            </div>
+          </v-col>
+        </div>
+      </v-row>
+    </v-responsive>
+  </v-container>
 </template>
 
+<style scoped>
+
+.specialty {
+  font-size: 20px;
+  font-weight: bold;
+}
+.item-wrapper {
+  position: relative;
+  margin-bottom: -16px;
+}
+
+.item-content {
+  background-color: #ffffff;
+  box-shadow: 3px 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.item-image {
+  float: left;
+  width: 60px;
+  height: 60px;
+  margin-right: 16px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-details {
+  flex: 1;
+}
+
+/* Optional: Add transition for hover effect */
+.item-content:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 255, 0.05);
+}
+</style>
+
 <script>
-import apiClient from '../api';
-const dummyRequest = {
-    distance: 3,
-    property: "프로그래밍",
-    hasSchedule: false,
-    searchText: null,
-    page: 1,
-    size: 20
+const requestData = {
+  distance: 3,
+  property: "프로그래밍",
+  hasSchedule: false,
+  searchText: null,
+  page: 1,
+  size: 20
 };
 
 export default {
-  data: () => ({
+data: () => ({
     items: [
       { type: 'subheader', title: 'Today' },
       {
@@ -126,23 +121,22 @@ export default {
       },
     ],
   }),
+
   mounted() {
     this.fetchData();
   },
   methods: {
     fetchData() {
-      console.log("12356");
-      apiClient.post('/user/director/list', dummyRequest)
-        .then(response => {
-          this.data = response.data;
-          console.log(response.data);
-        })
-        .catch(error => {
-          console.error(error);
-        });
+      this.$store.dispatch('fetchDirectorList', requestData)
     },
   },
-
+  computed: {
+    directorList() {
+      let list = this.$store.getters.getDirectorList;
+      console.log('lisddddt', list)
+      return Array.isArray(list) ? list : [];
+    },
+  },
 }
 
 </script>
