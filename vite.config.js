@@ -21,7 +21,9 @@ export default defineConfig({
   ],
   define: { 'process.env': {
     'VUE_APP_API_DEV_URL' : process.env.VUE_APP_API_DEV_URL,
-    'VUE_APP_TEMP_TOKEN' : process.env.VUE_APP_TEMP_TOKEN
+    'VUE_APP_API_SERVER_URL' : process.env.VUE_APP_API_SERVER_URL,
+    'VUE_APP_TEMP_DEV_TOKEN' : process.env.VUE_APP_TEMP_DEV_TOKEN,
+    'VUE_APP_TEMP_SERVER_TOKEN' : process.env.VUE_APP_TEMP_SERVER_TOKEN,
   } },
   resolve: {
     alias: {

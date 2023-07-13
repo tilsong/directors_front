@@ -2,14 +2,14 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: process.env.VUE_APP_API_DEV_URL,
-  timeout: 5000,
+  baseURL: process.env.VUE_APP_API_SERVER_URL, //VUE_APP_API_DEV_URL,
+  timeout: 20000,
 });
 
 apiClient.interceptors.request.use(
     (config) => {
         // const token = localStorage.getItem('auth');
-        const token = process.env.VUE_APP_TEMP_TOKEN; // 임시 토큰
+        const token = process.env.VUE_APP_TEMP_SERVER_TOKEN // VUE_APP_TEMP_DEV_TOKEN; // 임시 토큰
         if (token) {
           config.headers.Authorization = `Bearer ${token}`; 
         }
