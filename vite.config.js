@@ -1,18 +1,17 @@
-// Plugins
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
-// Utilities
 import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
+import dotenv from 'dotenv';
 
-// https://vitejs.dev/config/
+dotenv.config();
+
 export default defineConfig({
   plugins: [
     vue({ 
       template: { transformAssetUrls }
     }),
-    // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
     vuetify({
       autoImport: true,
       styles: {
@@ -20,7 +19,12 @@ export default defineConfig({
       },
     }),
   ],
-  define: { 'process.env': {} },
+  define: { 'process.env': {
+    'VUE_APP_API_DEV_URL' : process.env.VUE_APP_API_DEV_URL,
+    'VUE_APP_API_SERVER_URL' : process.env.VUE_APP_API_SERVER_URL,
+    'VUE_APP_TEMP_DEV_TOKEN' : process.env.VUE_APP_TEMP_DEV_TOKEN,
+    'VUE_APP_TEMP_SERVER_TOKEN' : process.env.VUE_APP_TEMP_SERVER_TOKEN,
+  } },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
