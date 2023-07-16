@@ -3,16 +3,17 @@
     <v-responsive class="align-center fill-height">
       <h3 class="text-h4 font-weight-bold text-center">디렉터 찾기</h3>
       <div class="py-5" />
-      <div class="text-center text-h5" id="filter">
-        <div id="filter-title" style="margin-left: 5px;">검색 필터</div>
+      
+      <div id="filter">
+        <h5 id="filter-title" style="font-size: 25px;">검색 필터</h5>
         <div id="filter-list1" style="margin-left: 5px;">
           <v-btn
           prepend-icon="mdi-map-marker-off"
             size="large"
             color="deep-purple-darken-2"
-            @click="dialog = !dialog"
+            @click="openCertRegionDialog"
           >
-            지역 인증이 필요합니다
+            지역 인증하기
           </v-btn>
           <div id="slider">
             <v-slider
@@ -25,13 +26,39 @@
               label="지역 범위"
               model-value="0"
               tick-size="5"
+              @click="alertForCertRegion"
             />
           </div>
-        </div>
-        
-        <div id="filter-list">
+          
+          <v-dialog
+            v-model="dialog"
+            width="400"
+          >
+            <v-card>
+              <v-card-text style="text-align: center; margin-top: 5px; font-weight: bold;">
+                지역 인증을 진행하시겠습니까?
+                <br/>
+                근처의 디렉터를 검색할 수 있게 됩니다.
+              </v-card-text>
+              <v-spacer></v-spacer>
+              <v-btn
+                color="green-darken-1"
+                variant="text"
+                @click="dialog = false"
+              >
+                네
+              </v-btn>
+              <v-btn
+                color="yellow-darken-2"
+                variant="text"
+                @click="dialog = false"
+              >
+                아니오
+              </v-btn>           
+            </v-card>
+          </v-dialog>
 
-          <!-- <v-btn
+                    <!-- <v-btn
           prepend-icon="mdi-map-marker-off"
             size="large"
             color="deep-purple-darken-2"
@@ -39,8 +66,8 @@
           >
             {{ currentRegion }} , 지역 범위 {{ regionDegree }}
           </v-btn>   -->
-
-
+        </div>
+        <div id="filter-list">
           <v-combobox
           size="small"
           v-model="specialtyValue"
@@ -64,16 +91,21 @@
           append-inner-icon="mdi-magnify"
           @click:append-inner="fetchNewData"
           />
-
-          <!-- <div class="custom-textfield">
-            <input type="text" class="custom-textfield-input" placeholder="검색어를 입력하세요">
-          </div> -->
         </div>
       </div>
-      <div class="py-1" />
-      
+      <div class="py-3" />
+
+
       <v-row class="d-flex align-center justify-center " cols="8">
+        
         <div class="item-list"  ref="itemList">
+          <div v-if="directorList == null || directorList.length == 0">
+            <div style="margin-bottom: 10px; text-align: center; font-size: 20px; font-weight: bold;">검색된 디렉터가 존재하지 않습니다.</div>
+            <center>
+              <img src="@/assets/no_data.jpg" alt="no_data" style="width: 600px;">
+            </center>
+          </div>
+
           <v-col  v-for="(item, index) in directorList" :key="index">
             <div class="item-wrapper" @click="moveDirectorPage(item.id)">
               <div class="item-content">
@@ -95,6 +127,14 @@
 </template>
 
 <style scoped>
+
+#filter {
+  font-weight: bold;
+  width: 800px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
 .item-list {
   margin-left: 5px;
   margin-right: 5px;
@@ -123,9 +163,7 @@
 #filter-title {
   text-align: left;
 }
-#filter {
-  font-weight: bold;
-}
+
 .specialty {
   font-size: 20px;
   font-weight: bold;
@@ -228,14 +266,21 @@ export default {
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
+    alertForCertRegion(){
+      alert("지역 인증이 필요합니다.");
+    },
+    openCertRegionDialog() {
+      // alert("로그인 후 이용 가능한 서비스입니다.");
+      this.dialog = !this.dialog;
+    },
     moveDirectorPage(id) {
       console.log('moveDirectorPage: ', id);
     },
     fetchNewData() {
+      console.log('this.directorList', this.directorList);
       if (this.specialtyValue === "전체") {
         this.specialtyValue = null;
       }
-
       this.$store.dispatch('fetchNewDirectorList', {
         "distance": this.distance,
         "property": this.specialtyValue,
@@ -246,13 +291,13 @@ export default {
       })
     },
     fetchData() {
-      if (this.property === "전체") {
-        this.property = null;
+      if (this.specialtyValue === "전체") {
+        this.specialtyValue = null;
       }
       this.$store.dispatch('fetchDirectorList', {
         "distance": this.distance,
-        "property": this.property,
-        "hasSchedule": this.hasSchedule,
+        "property": this.specialtyValue,
+        "hasSchedule": this.scheduleValue === "있음" ? true : false,
         "searchText": this.searchText,
         "page": this.page,
         "size": 20,
