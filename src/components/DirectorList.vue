@@ -3,38 +3,79 @@
     <v-responsive class="align-center fill-height">
       <h3 class="text-h4 font-weight-bold text-center">디렉터 찾기</h3>
       <div class="py-5" />
-      <div class="text-center text-h6" id="filter">
-        <div id="filter-title">검색 필터</div>
-        <div id="filter-list">
-            <div>지역 설정 </div>
-            <!-- (로그인x -> uncheck 모드, 로그인 시 유저 지역 및 범위 정도 설정할 수 있도록 하기) -->
-
-            <v-combobox
-            v-model="property"
-            label="분야"
-            :items="specialtyProperty"
-            variant="solo"
-          />
-
-
-          <!-- 선택: 체크 박스 사용  -->
-          <v-switch
-          color="primary"
-          :model-value="hasSchedule"
-          label="스케줄"
-          class="custom-switch"          
-          />
-
-          <div class="custom-textfield">
-            <input type="text" class="custom-textfield-input" placeholder="검색어를 입력하세요">
+      <div class="text-center text-h5" id="filter">
+        <div id="filter-title" style="margin-left: 5px;">검색 필터</div>
+        <div id="filter-list1" style="margin-left: 5px;">
+          <v-btn
+          prepend-icon="mdi-map-marker-off"
+            size="large"
+            color="deep-purple-darken-2"
+            @click="dialog = !dialog"
+          >
+            지역 인증이 필요합니다
+          </v-btn>
+          <div id="slider">
+            <v-slider
+              readonly
+              :ticks="tickLabels"
+              :max="4"
+              step="1"
+              show-ticks
+              color="deep-purple-darken-2"
+              label="지역 범위"
+              model-value="0"
+              tick-size="5"
+            />
           </div>
         </div>
+        
+        <div id="filter-list">
+
+          <!-- <v-btn
+          prepend-icon="mdi-map-marker-off"
+            size="large"
+            color="deep-purple-darken-2"
+            @click="dialog = !dialog"
+          >
+            {{ currentRegion }} , 지역 범위 {{ regionDegree }}
+          </v-btn>   -->
+
+
+          <v-combobox
+          size="small"
+          v-model="specialtyValue"
+          label="분야"
+          :items="specialtyProperty"
+          variant="solo"
+          @update:model-value="fetchNewData"
+          style="margin-left: 5px;"
+          />
+
+          <v-combobox
+          v-model="scheduleValue"
+          label="스케줄"
+          :items="scheduleProperty"
+          variant="solo"
+          @update:model-value="fetchNewData"
+          />
+          <v-text-field 
+          label="검색어를 입력하세요." 
+          variant="solo-filled"
+          append-inner-icon="mdi-magnify"
+          @click:append-inner="fetchNewData"
+          />
+
+          <!-- <div class="custom-textfield">
+            <input type="text" class="custom-textfield-input" placeholder="검색어를 입력하세요">
+          </div> -->
+        </div>
       </div>
+      <div class="py-1" />
       
       <v-row class="d-flex align-center justify-center " cols="8">
         <div class="item-list"  ref="itemList">
           <v-col  v-for="(item, index) in directorList" :key="index">
-            <div class="item-wrapper  a" @click="moveDirectorPage(item.id)">
+            <div class="item-wrapper" @click="moveDirectorPage(item.id)">
               <div class="item-content">
                 <div class="item-image">
                   <img :src="item.image" alt="Director Image">
@@ -54,70 +95,36 @@
 </template>
 
 <style scoped>
-.custom-textfield {
-  position: relative;
-  width: 200px;
+.item-list {
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
-.custom-textfield-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
+#slider {
+  margin-top: 20px;
+  margin-left: 10px;
+  width: 400px;
 }
 
-.custom-textfield-label {
-  position: absolute;
-  top: 50%;
-  left: 10px;
-  transform: translateY(-50%);
-  pointer-events: none;
-  transition: transform 0.3s, font-size 0.3s;
-  font-size: 14px;
-  color: #999;
+#filter-list1 {
+  display: flex;
+  flex: 1;
+  justify-content: left;
+  align-items: center;
 }
 
-.custom-textfield-input:focus + .custom-textfield-label,
-.custom-textfield-input:not(:placeholder-shown) + .custom-textfield-label {
-  transform: translateY(-100%) scale(0.8);
-  font-size: 12px;
-  color: #555;
-}
-
-.v-input--switch__track {
-    border-radius: 25px;
-    width: 68px;
-    height: 29px;
-    top: -2px;
-}
-
-.v-input--switch__thumb {
-  left: 6px;
-}
-
-.custom-switch .v-input__slot .v-label {
-  left: 6px !important
-}
-
-.v-input--selection-controls__ripple {
-  height: 0;
-  width: 0
-}
 #filter-list {
   display: flex;
-  justify-content: flex-start
+  justify-content: space-around;
 }
 #filter-list > div {
-  margin-right: 0px;
+  margin-right: 20px;
 }
 #filter-title {
   text-align: left;
-  margin-bottom: 10px;
 }
 #filter {
   font-weight: bold;
-  /* border: 1px solid blue; */
 }
 .specialty {
   font-size: 20px;
@@ -168,9 +175,10 @@
 <script>
 export default {
   data: () => ({
+    dialog: false,
     distance: 3,
-    property: null,
-    hasSchedule: false,
+    specialtyValue: null,
+    scheduleValue: null,
     searchText: null,
     page: 1,
     specialtyProperty: [
@@ -199,7 +207,18 @@ export default {
     "여행",
     "예술",
     "기타",
-    ]
+    ],
+    scheduleProperty: [
+    "있음",
+    "없음",
+    ],
+    tickLabels: {
+      0: '1',
+      1: '2',
+      2: '3',
+      3: '4',
+      4: '5',
+    },
   }),
   mounted() {
     this.fetchNewData();
@@ -213,13 +232,14 @@ export default {
       console.log('moveDirectorPage: ', id);
     },
     fetchNewData() {
-      if (this.property === "전체") {
-        this.property = null;
+      if (this.specialtyValue === "전체") {
+        this.specialtyValue = null;
       }
+
       this.$store.dispatch('fetchNewDirectorList', {
         "distance": this.distance,
-        "property": this.property,
-        "hasSchedule": this.hasSchedule,
+        "property": this.specialtyValue,
+        "hasSchedule": this.scheduleValue === "있음" ? true : false,
         "searchText": this.searchText,
         "page": this.page,
         "size": 20,
