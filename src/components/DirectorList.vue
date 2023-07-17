@@ -97,7 +97,6 @@
 
 
       <v-row class="d-flex align-center justify-center " cols="8">
-        
         <div class="item-list"  ref="itemList">
           <div v-if="directorList == null || directorList.length == 0">
             <div style="margin-bottom: 10px; text-align: center; font-size: 20px; font-weight: bold;">검색된 디렉터가 존재하지 않습니다.</div>
@@ -274,10 +273,9 @@ export default {
       this.dialog = !this.dialog;
     },
     moveDirectorPage(id) {
-      console.log('moveDirectorPage: ', id);
+      // console.log('moveDirectorPage: ', id);
     },
     fetchNewData() {
-      console.log('this.directorList', this.directorList);
       if (this.specialtyValue === "전체") {
         this.specialtyValue = null;
       }
