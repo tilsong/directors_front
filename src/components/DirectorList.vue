@@ -31,7 +31,58 @@
           </div>
           
           <v-dialog
-            v-model="dialog"
+            v-model="logInDialog"
+            width="400"
+          >
+            <v-card>
+              <div style="flex:1; display: flex; justify-content: end;">
+                <v-btn
+                  icon="mdi-close"
+                  @click="cancleLoginDialog"
+                  elevation="0" 
+                />
+              </div>
+            <v-form
+              v-model="logInForm"
+              @submit.prevent="onSubmit"
+            >
+              <v-card-text id ="loginDialogTitle">
+                로그인
+              </v-card-text>
+              <div style="margin: 10px 20px 0px 20px;">
+                <v-text-field
+                  label="아이디"
+                  required
+                  v-model="userId"
+                  :rules="[rules.userIdRule]"
+                ></v-text-field>
+                <v-text-field
+                  label="패스워드"
+                  required
+                  v-model="password"
+                  :rules="[rules.passwordRule]"
+                  @enter="logIn"
+                ></v-text-field>
+              </div>
+              <v-spacer></v-spacer>
+              <div style="display: flex; flex:1; justify-content: center;">
+                <v-btn
+                  :disabled="!logInForm"
+                  color="deep-purple-darken-2"
+                  @click="logIn"
+                  type="submit"
+                  style="width: 370px; margin: 10px 20px 15px; padding:"
+                >
+                  로그인
+                </v-btn>
+              </div>
+              </v-form>
+         
+            </v-card>
+          </v-dialog>
+
+          <v-dialog
+            v-model="regionDialog"
             width="400"
           >
             <v-card>
@@ -44,14 +95,14 @@
               <v-btn
                 color="green-darken-1"
                 variant="text"
-                @click="dialog = false"
+                @click="regionDialog = false"
               >
                 네
               </v-btn>
               <v-btn
                 color="yellow-darken-2"
                 variant="text"
-                @click="dialog = false"
+                @click="regionDialog = false"
               >
                 아니오
               </v-btn>           
@@ -126,6 +177,12 @@
 </template>
 
 <style scoped>
+#loginDialogTitle {
+  text-align: center; 
+  font-size: 30px;
+  margin-top: -20px;
+  font-weight: bold;
+} 
 
 #filter {
   font-weight: bold;
@@ -212,7 +269,14 @@
 <script>
 export default {
   data: () => ({
-    dialog: false,
+    rules: {
+      userIdRule: userId => userId.length > 8 || '아이디는 8글자 이상 입력되어야 합니다.',
+      passwordRule: password => password.length > 8 || '패스워드는 8글자 이상 입력되어야 합니다.',
+    },
+    logInForm: false,
+    userId: "",
+    password: "",
+    regionDialog: false,
     distance: 3,
     specialtyValue: null,
     scheduleValue: null,
@@ -265,12 +329,27 @@ export default {
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
+    logIn() {
+      if (!this.logInForm) return
+
+      this.loading = true
+
+      setTimeout(() => (this.loading = false), 2000)
+
+      this.$store.dispatch('logIn', {
+        "userId": this.userId,
+        "password": this.password
+      });
+    },
+    cancleLoginDialog() {
+      this.$store.commit('setlogInDialog');
+    },
     alertForCertRegion(){
       alert("지역 인증이 필요합니다.");
     },
     openCertRegionDialog() {
       // alert("로그인 후 이용 가능한 서비스입니다.");
-      this.dialog = !this.dialog;
+      this.regionDialog = !this.regionDialog;
     },
     moveDirectorPage(id) {
       // console.log('moveDirectorPage: ', id);
@@ -324,6 +403,9 @@ export default {
     },
     isLoading() {
       return this.$store.state.loading;
+    },
+    logInDialog() {
+      return this.$store.getters.getLogInDialog;
     },
   },
 }

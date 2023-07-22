@@ -1,11 +1,14 @@
 import { createStore } from 'vuex';
 import apiClient from '../api';
-
+import router from '../router'; 
 
 const store = createStore({
   state: {
     directorList: [],
     loading: false,
+    isLogin: false,
+    logInDialog: false,
+    signUpDialog: false,
   },
   mutations: {
     setLoading(state, isLoading) {
@@ -19,8 +22,42 @@ const store = createStore({
       const list = await setDirectors(data);
       state.directorList = state.directorList.concat(list);
     },
+    async logIn(state, data) {
+      console.log("in mutation ", data);
+    },
+    async setlogInDialog(state) {
+      state.logInDialog = !state.logInDialog;
+    },
+    async setLogin(state) {
+      state.isLogin = !state.isLogin;
+    }
   },
   actions: {
+    async initLogin({commit, state}) {
+        const auth = localStorage.getItem('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkaXJlY3RvcnMuY29tIiwiaWF0IjoxNjg4MDEwMTk0LCJleHAiOjE2OTA2MDIxOTQsInN1YiI6ImFiaWdhaTMzMzQzNDMzMzMifQ.8t3lkxhYe1LTkSBb0R3OwP5asOQwTcoJ1yAa3qtRMJk');
+
+    },
+    async logIn({commit, state}, requestData){
+      if (state.loading) {
+        return;  
+      }
+      commit('setLoading', true);
+
+      try {
+        const response = await apiClient.post('/user/logIn', requestData);
+        console.log("/user/logIn", requestData);
+        localStorage.setItem("accessToken", response.data.accessToken);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+
+        // router.push('/').then(() => router.go(0));
+      } catch(e) {
+        alert("로그인이 실패했습니다. \n아이디와 패스워드를 다시 확인해주세요.");
+        console.log(e);
+      } finally {
+        commit('setLoading', false);
+      }
+    },
+
     async fetchNewDirectorList({ commit, state}, requestData) {
       if (state.loading) {
         return; 
@@ -57,6 +94,12 @@ const store = createStore({
     getDirectorList(state) {
       return state.directorList;
     },
+    getIsLogin(state) {
+      return state.isLogin;
+    },
+    getLogInDialog(state) {
+      return state.logInDialog;
+    }
   },
 });
 
