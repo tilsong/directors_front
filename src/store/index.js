@@ -33,8 +33,21 @@ const store = createStore({
     },
   },
   actions: {
-    async getUserRegionList () {
+    async isDuplicateId({commit, state}, userId) {
+      if (state.loading) {
+        return;  
+      }
+      commit('setLoading', true);
 
+      try {
+        await apiClient.get(`/user/duplicated/${userId}`);
+        alert("사용가능한 아이디입니다.");
+      } catch(e) {
+        alert("중복된 아이디입니다. ");
+        console.log(e);
+      } finally {
+        commit('setLoading', false);
+      }
     },
     async logIn({commit, state}, requestData){
       if (state.loading) {
@@ -49,10 +62,9 @@ const store = createStore({
         localStorage.setItem("token", response.data.refreshToken);
         
         // regionList 요청하고 저장하기
-        const regionResponse = await apiClient.get('/region/nearestAddress/1', requestData);
+        const regionResponse = await apiClient.get('/region/nearestAddress/1');
         console.log("/region/nearestAddress/1", regionResponse.data);
         router.push('/');
-
       } catch(e) {
         alert("로그인이 실패했습니다. \n아이디와 패스워드를 다시 확인해주세요.");
         console.log(e);
