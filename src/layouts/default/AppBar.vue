@@ -6,23 +6,15 @@
     <div class="ml-2" id="app-bar-title">Directors</div>
 
     <v-spacer/>
-    <div v-if="!isLogin" style="margin-right: 10px;">
+    <div style="margin-right: 10px;">
       <v-btn 
       prepend-icon="mdi-account-circle" 
       color="deep-purple-darken-3" 
       elevation="1" 
       style="margin-right: 7px;"
-      @click="openLoginDialog"
+      @click="openLogOutDialog"
       >
-        로그인
-      </v-btn>
-      <v-btn 
-      prepend-icon="mdi-account-plus-outline" 
-      color="yellow-darken-2" 
-      elevation="1" 
-      @click="openSignupDialog"
-      >
-        회원가입
+        로그아웃
       </v-btn>
     </div>
   
@@ -37,21 +29,14 @@ export default {
   data: () => ({
   }),
   mounted() {
-    // this.fetchNewData();
   },
   methods: {
-    openLoginDialog() {
+    openLogOutDialog() {
       console.log("login dialog open!!");
-      this.$store.commit('setlogInDialog');
-    },
-    openSignupDialog() {
-      console.log("signup dialog open!!");
+      this.$store.commit('setlogOutDialog');
     },
   },
   computed: {
-    isLogin() {
-      return this.$store.getters.getIsLogin;
-    },
   },
 }
 </script>

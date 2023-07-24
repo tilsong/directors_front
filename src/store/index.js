@@ -7,8 +7,8 @@ const store = createStore({
     directorList: [],
     loading: false,
     isLogin: false,
-    logInDialog: false,
-    signUpDialog: false,
+    logOutDialog: false,
+    userRegionList: [],
   },
   mutations: {
     setLoading(state, isLoading) {
@@ -25,16 +25,15 @@ const store = createStore({
     async logIn(state, data) {
       console.log("in mutation ", data);
     },
-    async setlogInDialog(state) {
-      state.logInDialog = !state.logInDialog;
+    async setlogOutDialog(state) {
+      state.logOutDialog = !state.logOutDialog;
     },
-    async setLogin(state) {
-      state.isLogin = !state.isLogin;
-    }
+    async setUserRegion(state, data) {
+      state.userRegionList = data;
+    },
   },
   actions: {
-    async initLogin({commit, state}) {
-        const auth = localStorage.getItem('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkaXJlY3RvcnMuY29tIiwiaWF0IjoxNjg4MDEwMTk0LCJleHAiOjE2OTA2MDIxOTQsInN1YiI6ImFiaWdhaTMzMzQzNDMzMzMifQ.8t3lkxhYe1LTkSBb0R3OwP5asOQwTcoJ1yAa3qtRMJk');
+    async getUserRegionList () {
 
     },
     async logIn({commit, state}, requestData){
@@ -44,12 +43,16 @@ const store = createStore({
       commit('setLoading', true);
 
       try {
+        localStorage.removeItem("token");
         const response = await apiClient.post('/user/logIn', requestData);
         console.log("/user/logIn", requestData);
-        localStorage.setItem("accessToken", response.data.accessToken);
-        localStorage.setItem("refreshToken", response.data.refreshToken);
+        localStorage.setItem("token", response.data.refreshToken);
+        
+        // regionList 요청하고 저장하기
+        const regionResponse = await apiClient.get('/region/nearestAddress/1', requestData);
+        console.log("/region/nearestAddress/1", regionResponse.data);
+        router.push('/');
 
-        // router.push('/').then(() => router.go(0));
       } catch(e) {
         alert("로그인이 실패했습니다. \n아이디와 패스워드를 다시 확인해주세요.");
         console.log(e);
@@ -97,8 +100,8 @@ const store = createStore({
     getIsLogin(state) {
       return state.isLogin;
     },
-    getLogInDialog(state) {
-      return state.logInDialog;
+    getLogOutDialog(state) {
+      return state.logOutDialog;
     }
   },
 });

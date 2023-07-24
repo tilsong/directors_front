@@ -29,58 +29,34 @@
               @click="alertForCertRegion"
             />
           </div>
-          
+          <!---- 로그아웃 다이얼로그 ---->
           <v-dialog
-            v-model="logInDialog"
+            v-model="logOutDialog"
             width="400"
           >
             <v-card>
-              <div style="flex:1; display: flex; justify-content: end;">
-                <v-btn
-                  icon="mdi-close"
-                  @click="cancleLoginDialog"
-                  elevation="0" 
-                />
-              </div>
-            <v-form
-              v-model="logInForm"
-              @submit.prevent="onSubmit"
-            >
-              <v-card-text id ="loginDialogTitle">
-                로그인
+              <v-card-text style="text-align: center; margin-top: 5px; font-weight: bold;">
+                로그아웃하시겠습니까?
               </v-card-text>
-              <div style="margin: 10px 20px 0px 20px;">
-                <v-text-field
-                  label="아이디"
-                  required
-                  v-model="userId"
-                  :rules="[rules.userIdRule]"
-                ></v-text-field>
-                <v-text-field
-                  label="패스워드"
-                  required
-                  v-model="password"
-                  :rules="[rules.passwordRule]"
-                  @enter="logIn"
-                ></v-text-field>
-              </div>
               <v-spacer></v-spacer>
-              <div style="display: flex; flex:1; justify-content: center;">
-                <v-btn
-                  :disabled="!logInForm"
-                  color="deep-purple-darken-2"
-                  @click="logIn"
-                  type="submit"
-                  style="width: 370px; margin: 10px 20px 15px; padding:"
-                >
-                  로그인
-                </v-btn>
-              </div>
-              </v-form>
-         
+              <v-btn
+                color="green-darken-1"
+                variant="text"
+                @click="logOut"
+              >
+                네
+              </v-btn>
+              <v-btn
+                color="yellow-darken-2"
+                variant="text"
+                @click="changeLogOutDialog"
+              >
+                아니오
+              </v-btn>           
             </v-card>
           </v-dialog>
 
+          <!---- 지역 인증 다이얼로그 ---->
           <v-dialog
             v-model="regionDialog"
             width="400"
@@ -157,7 +133,7 @@
           </div>
 
           <v-col  v-for="(item, index) in directorList" :key="index">
-            <div class="item-wrapper" @click="moveDirectorPage(item.id)">
+            <div class="item-wrapper" @click="moveDirectorPage">
               <div class="item-content">
                 <div class="item-image">
                   <img :src="item.image" alt="Director Image">
@@ -267,6 +243,8 @@
 </style>
 
 <script>
+import router from '../router'; 
+
 export default {
   data: () => ({
     rules: {
@@ -329,20 +307,12 @@ export default {
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
-    logIn() {
-      if (!this.logInForm) return
-
-      this.loading = true
-
-      setTimeout(() => (this.loading = false), 2000)
-
-      this.$store.dispatch('logIn', {
-        "userId": this.userId,
-        "password": this.password
-      });
+    changeLogOutDialog() {
+      this.$store.commit('setlogOutDialog');
     },
-    cancleLoginDialog() {
-      this.$store.commit('setlogInDialog');
+    logOut() {
+      localStorage.removeItem("token");
+      router.push('/LogIn').then(() => router.go(0));
     },
     alertForCertRegion(){
       alert("지역 인증이 필요합니다.");
@@ -351,8 +321,8 @@ export default {
       // alert("로그인 후 이용 가능한 서비스입니다.");
       this.regionDialog = !this.regionDialog;
     },
-    moveDirectorPage(id) {
-      // console.log('moveDirectorPage: ', id);
+    moveDirectorPage() {
+      alert('디렉터 상세 페이지”는 준비 중에 있습니다');
     },
     fetchNewData() {
       if (this.specialtyValue === "전체") {
@@ -363,7 +333,7 @@ export default {
         "property": this.specialtyValue,
         "hasSchedule": this.scheduleValue === "있음" ? true : false,
         "searchText": this.searchText,
-        "page": this.page,
+        "page": 1,
         "size": 20,
       })
     },
@@ -378,7 +348,7 @@ export default {
         "searchText": this.searchText,
         "page": this.page,
         "size": 20,
-      })
+      });
     },
     handleScroll() {
       if (this.$refs.itemList) {
@@ -404,8 +374,8 @@ export default {
     isLoading() {
       return this.$store.state.loading;
     },
-    logInDialog() {
-      return this.$store.getters.getLogInDialog;
+    logOutDialog() {
+      return this.$store.getters.getLogOutDialog;
     },
   },
 }
