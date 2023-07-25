@@ -10,7 +10,6 @@ const store = createStore({
     logOutDialog: false,
     userRegion: null,
     userRegionList: [],
-    userRegionListDescription: "",
   },
   mutations: {
     setLoading(state, isLoading) {
@@ -31,9 +30,7 @@ const store = createStore({
       state.userRegion = data;
     },
     async setUserRegionList(state, data) {
-      console.log(data);
       state.userRegionList = data;
-      state.userRegionListDescription = data[0].unitAddress + ` 외 ${data.length-1} 곳`;
     },
   },
   actions: {
@@ -45,7 +42,6 @@ const store = createStore({
 
       try {
         const response = await apiClient.get(`/region/nearestAddress/${distance}`);
-        
         commit('setUserRegionList', response.data);
       } catch(e) {
         console.log(e);
@@ -78,7 +74,7 @@ const store = createStore({
 
       try {
         await apiClient.get(`/user/duplicated/${userId}`);
-        alert("사용가능한 아이디입니다.");
+        alert("사용 가능한 아이디입니다.");
         return true;
       } catch(e) {
         alert("중복된 아이디입니다. ");
@@ -96,12 +92,8 @@ const store = createStore({
       try {
         localStorage.removeItem("token");
         const response = await apiClient.post('/user/logIn', requestData);
-        console.log("/user/logIn", requestData);
         localStorage.setItem("token", response.data.refreshToken);
         
-        // regionList 요청하고 저장하기
-        const regionResponse = await apiClient.get('/region/nearestAddress/1');
-        console.log("/region/nearestAddress/1", regionResponse.data);
         router.push('/');
       } catch(e) {
         alert("로그인이 실패했습니다. \n아이디와 패스워드를 다시 확인해주세요.");
@@ -117,8 +109,7 @@ const store = createStore({
       commit('setLoading', true);
 
       try {
-        const response = await apiClient.post('/user/signUp', requestData);
-        console.log(response);
+        await apiClient.post('/user/signUp', requestData);
         alert("회원가입이 성공했습니다.");
       } catch(e) {
         alert("회원가입이 실패했습니다. 다시 시도해주세요.");
@@ -168,6 +159,9 @@ const store = createStore({
     },
     getLogOutDialog(state) {
       return state.logOutDialog;
+    },
+    getUserRegionList(state) {
+      return state.userRegionList;
     }
   },
 });

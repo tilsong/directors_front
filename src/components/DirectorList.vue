@@ -8,25 +8,29 @@
         <h5 id="filter-title" style="font-size: 25px;">검색 필터</h5>
         <div id="filter-list1" style="margin-left: 5px;">
           <v-btn
-          prepend-icon="mdi-map-marker-off"
+            v-if="userRegionList == ''"
+            prepend-icon="mdi-map-marker-off"
             size="large"
             color="deep-purple-darken-2"
             @click="openCertRegionDialog"
           >
             지역 인증하기
           </v-btn>
-          <div id="slider">
+          <div v-else style="display: flex; align-items: flex-end; margin-bottom: 12px;">
+            <div style="font-size: 20px; color: #512DA8;">{{ userRegionList[0].unitAddress }}</div>
+            <div> &nbsp;&nbsp;과 근처 동네 {{ userRegionList.length }}개</div>
+          </div>
+          <div id="slider" >
             <v-slider
-              readonly
+              :disabled="userRegionList == ''"
               :ticks="tickLabels"
               :max="4"
               step="1"
               show-ticks
               color="deep-purple-darken-2"
               label="지역 범위"
-              model-value="0"
-              tick-size="5"
-              @click="alertForCertRegion"
+              v-model="distance"
+              v-on:update:model-value="updateDistance"
             />
           </div>
           <!---- 로그아웃 다이얼로그 ---->
@@ -84,16 +88,8 @@
               </v-btn>           
             </v-card>
           </v-dialog>
-
-                    <!-- <v-btn
-          prepend-icon="mdi-map-marker-off"
-            size="large"
-            color="deep-purple-darken-2"
-            @click="dialog = !dialog"
-          >
-            {{ currentRegion }} , 지역 범위 {{ regionDegree }}
-          </v-btn>   -->
         </div>
+        
         <div id="filter-list">
           <v-combobox
           size="small"
@@ -255,7 +251,7 @@ export default {
     userId: "",
     password: "",
     regionDialog: false,
-    distance: 3,
+    distance: 0,
     specialtyValue: null,
     scheduleValue: null,
     searchText: null,
@@ -299,15 +295,19 @@ export default {
       4: '5',
     },
   }),
-  mounted() {
-    this.$store.dispatch('getNearestAddress', 1);
-    this.fetchNewData();
+  async mounted() {
+    await this.$store.dispatch('getNearestAddress', 1);
+    await this.fetchNewData();
     window.addEventListener("scroll", this.handleScroll);
   },
   beforeUnmount() {
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
+    updateDistance() {
+      this.$store.dispatch('getNearestAddress', this.distance+1);
+      this.fetchNewData();
+    },
     getRegionCertification() {
       if (navigator.geolocation) {
         this.getGeolocation()
@@ -342,7 +342,6 @@ export default {
       alert("지역 인증이 필요합니다.");
     },
     openCertRegionDialog() {
-      // alert("로그인 후 이용 가능한 서비스입니다.");
       this.regionDialog = !this.regionDialog;
     },
     moveDirectorPage() {
@@ -352,8 +351,9 @@ export default {
       if (this.specialtyValue === "전체") {
         this.specialtyValue = null;
       }
+
       this.$store.dispatch('fetchNewDirectorList', {
-        "distance": this.distance,
+        "distance": this.distance + 1,
         "property": this.specialtyValue,
         "hasSchedule": this.scheduleValue === "있음" ? true : false,
         "searchText": this.searchText,
@@ -401,6 +401,9 @@ export default {
     logOutDialog() {
       return this.$store.getters.getLogOutDialog;
     },
+    userRegionList() {
+      return this.$store.getters.getUserRegionList;
+    }
   },
 }
 

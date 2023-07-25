@@ -248,7 +248,7 @@ export default {
     },
     signUp () {
         if (!this.canUseId) {
-            alert("아이디 중복검사가 필요합니다.");
+            alert("아이디 중복 검사가 필요합니다.");
             return;
         }
         // api call.
