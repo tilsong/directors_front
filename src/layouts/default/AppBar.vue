@@ -32,7 +32,6 @@ export default {
   },
   methods: {
     openLogOutDialog() {
-      console.log("login dialog open!!");
       this.$store.commit('setlogOutDialog');
     },
   },

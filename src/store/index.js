@@ -60,6 +60,7 @@ const store = createStore({
         
         commit('setUserRegion', response.data);
         alert("지역 인증이 완료되었습니다.");
+        router.push('/').then(() => router.go(0));
       } catch(e) {
         console.log(e);
       } finally {

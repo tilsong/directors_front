@@ -117,10 +117,12 @@
           @update:model-value="fetchNewData"
           />
           <v-text-field 
+          v-model="searchText"
           label="검색어를 입력하세요." 
           variant="solo-filled"
           append-inner-icon="mdi-magnify"
           @click:append-inner="fetchNewData"
+          @keyup.enter="fetchNewData"
           />
         </div>
       </div>
