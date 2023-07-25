@@ -1,6 +1,7 @@
 import { createStore } from 'vuex';
 import apiClient from '../api';
 import router from '../router'; 
+import { faker } from '@faker-js/faker';
 
 const store = createStore({
   state: {
@@ -194,7 +195,7 @@ const setDirectors = async (data) => {
   for (let i = 0; i < data.length; i++) {
     let specialty = "";
     for (let j = 0; j < data[i].specialtyList.length; j++) {
-        specialty += data[i].specialtyList[j].property;
+        specialty += data[i].specialtyList[j].propertyValue;
         if (j != data[i].specialtyList.length - 1) {
           specialty += (', ');
         }
@@ -205,11 +206,11 @@ const setDirectors = async (data) => {
       description = description.substring(0, 100) + ' ... ';
     }
     if (data[i].specialtyList.length > 1) {
-      description += `\n 그 외 ${data[i].specialtyList.length}개의 전문 분야 소유.`;
+      description += `,\n 그 외 ${data[i].specialtyList.length}개의 전문 분야 소유.`;
     }
 
     list.push({
-      image: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
+      image: faker.image.avatarLegacy(),
       name: data[i].name,
       id: data[i].id,
       specialty,
