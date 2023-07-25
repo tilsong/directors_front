@@ -1,4 +1,12 @@
 <template>
+  <div v-if="isLoading" class="loading-overlay">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      :width="15"
+      :size="150"
+    />
+  </div>
   <v-container class="">
     <v-responsive class="align-center fill-height">
       <h3 class="text-h4 font-weight-bold text-center">디렉터 찾기</h3>
@@ -8,30 +16,61 @@
         <h5 id="filter-title" style="font-size: 25px;">검색 필터</h5>
         <div id="filter-list1" style="margin-left: 5px;">
           <v-btn
-          prepend-icon="mdi-map-marker-off"
+            v-if="userRegionList == ''"
+            prepend-icon="mdi-map-marker-off"
             size="large"
             color="deep-purple-darken-2"
             @click="openCertRegionDialog"
           >
             지역 인증하기
           </v-btn>
-          <div id="slider">
+          <div v-else style="display: flex; align-items: flex-end; margin-bottom: 12px;">
+            <div style="font-size: 20px; color: #512DA8;">{{ userRegionList[0].unitAddress }}</div>
+            <div> &nbsp;&nbsp;과 근처 동네 {{ userRegionList.length }}개</div>
+          </div>
+          <div id="slider" >
             <v-slider
-              readonly
+              :disabled="userRegionList == ''"
               :ticks="tickLabels"
               :max="4"
               step="1"
               show-ticks
               color="deep-purple-darken-2"
               label="지역 범위"
-              model-value="0"
-              tick-size="5"
-              @click="alertForCertRegion"
+              v-model="distance"
+              v-on:update:model-value="updateDistance"
             />
           </div>
-          
+          <!---- 로그아웃 다이얼로그 ---->
           <v-dialog
-            v-model="dialog"
+            v-model="logOutDialog"
+            width="400"
+          >
+            <v-card>
+              <v-card-text style="text-align: center; margin-top: 5px; font-weight: bold;">
+                로그아웃하시겠습니까?
+              </v-card-text>
+              <v-spacer></v-spacer>
+              <v-btn
+                color="green-darken-1"
+                variant="text"
+                @click="logOut"
+              >
+                네
+              </v-btn>
+              <v-btn
+                color="yellow-darken-2"
+                variant="text"
+                @click="changeLogOutDialog"
+              >
+                아니오
+              </v-btn>           
+            </v-card>
+          </v-dialog>
+
+          <!---- 지역 인증 다이얼로그 ---->
+          <v-dialog
+            v-model="regionDialog"
             width="400"
           >
             <v-card>
@@ -44,29 +83,21 @@
               <v-btn
                 color="green-darken-1"
                 variant="text"
-                @click="dialog = false"
+                @click="getRegionCertification"
               >
                 네
               </v-btn>
               <v-btn
                 color="yellow-darken-2"
                 variant="text"
-                @click="dialog = false"
+                @click="regionDialog = false"
               >
                 아니오
               </v-btn>           
             </v-card>
           </v-dialog>
-
-                    <!-- <v-btn
-          prepend-icon="mdi-map-marker-off"
-            size="large"
-            color="deep-purple-darken-2"
-            @click="dialog = !dialog"
-          >
-            {{ currentRegion }} , 지역 범위 {{ regionDegree }}
-          </v-btn>   -->
         </div>
+
         <div id="filter-list">
           <v-combobox
           size="small"
@@ -86,15 +117,16 @@
           @update:model-value="fetchNewData"
           />
           <v-text-field 
+          v-model="searchText"
           label="검색어를 입력하세요." 
           variant="solo-filled"
           append-inner-icon="mdi-magnify"
           @click:append-inner="fetchNewData"
+          @keyup.enter="fetchNewData"
           />
         </div>
       </div>
       <div class="py-3" />
-
 
       <v-row class="d-flex align-center justify-center " cols="8">
         <div class="item-list"  ref="itemList">
@@ -106,7 +138,7 @@
           </div>
 
           <v-col  v-for="(item, index) in directorList" :key="index">
-            <div class="item-wrapper" @click="moveDirectorPage(item.id)">
+            <div class="item-wrapper" @click="moveDirectorPage">
               <div class="item-content">
                 <div class="item-image">
                   <img :src="item.image" alt="Director Image">
@@ -126,6 +158,25 @@
 </template>
 
 <style scoped>
+.loading-overlay {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  z-index: 9999;
+}
+
+#loginDialogTitle {
+  text-align: center; 
+  font-size: 30px;
+  margin-top: -20px;
+  font-weight: bold;
+} 
 
 #filter {
   font-weight: bold;
@@ -210,10 +261,19 @@
 </style>
 
 <script>
+import router from '../router'; 
+
 export default {
   data: () => ({
-    dialog: false,
-    distance: 3,
+    rules: {
+      userIdRule: userId => userId.length > 8 || '아이디는 8글자 이상 입력되어야 합니다.',
+      passwordRule: password => password.length > 8 || '패스워드는 8글자 이상 입력되어야 합니다.',
+    },
+    logInForm: false,
+    userId: "",
+    password: "",
+    regionDialog: false,
+    distance: 0,
     specialtyValue: null,
     scheduleValue: null,
     searchText: null,
@@ -257,34 +317,68 @@ export default {
       4: '5',
     },
   }),
-  mounted() {
-    this.fetchNewData();
+  async mounted() {
+    await this.$store.dispatch('getNearestAddress', 1);
+    await this.fetchNewData();
     window.addEventListener("scroll", this.handleScroll);
   },
   beforeUnmount() {
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
+    async updateDistance() {
+      await this.$store.dispatch('getNearestAddress', this.distance+1);
+      await this.fetchNewData();
+    },
+    getRegionCertification() {
+      if (navigator.geolocation) {
+        this.getGeolocation()
+          .then(position => {
+            this.$store.dispatch('getRegionCertification', {
+              "latitude": position.coords.latitude,
+              "longitude": position.coords.longitude,
+            });
+          })
+          .catch(error => {
+            console.log(error);
+            alert("지역 인증이 실패했습니다. \n 해당 지역 혹은 브라우저를 지원하지 않습니다.");
+          })
+      } else { 
+        alert("지역 인증이 실패했습니다. \n 해당 지역 혹은 브라우저를 지원하지 않습니다.");
+      }
+      this.regionDialog = false
+    },
+    getGeolocation() {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+    },
+    changeLogOutDialog() {
+      this.$store.commit('setlogOutDialog');
+    },
+    logOut() {
+      localStorage.removeItem("token");
+      router.push('/LogIn').then(() => router.go(0));
+    },
     alertForCertRegion(){
       alert("지역 인증이 필요합니다.");
     },
     openCertRegionDialog() {
-      // alert("로그인 후 이용 가능한 서비스입니다.");
-      this.dialog = !this.dialog;
+      this.regionDialog = !this.regionDialog;
     },
-    moveDirectorPage(id) {
-      // console.log('moveDirectorPage: ', id);
+    moveDirectorPage() {
+      alert('디렉터 상세 페이지는 준비 중에 있습니다');
     },
     fetchNewData() {
       if (this.specialtyValue === "전체") {
         this.specialtyValue = null;
       }
       this.$store.dispatch('fetchNewDirectorList', {
-        "distance": this.distance,
+        "distance": this.distance + 1,
         "property": this.specialtyValue,
         "hasSchedule": this.scheduleValue === "있음" ? true : false,
         "searchText": this.searchText,
-        "page": this.page,
+        "page": 1,
         "size": 20,
       })
     },
@@ -293,13 +387,13 @@ export default {
         this.specialtyValue = null;
       }
       this.$store.dispatch('fetchDirectorList', {
-        "distance": this.distance,
+        "distance": this.distance + 1,
         "property": this.specialtyValue,
         "hasSchedule": this.scheduleValue === "있음" ? true : false,
         "searchText": this.searchText,
         "page": this.page,
         "size": 20,
-      })
+      });
     },
     handleScroll() {
       if (this.$refs.itemList) {
@@ -322,9 +416,15 @@ export default {
       let list = this.$store.getters.getDirectorList;
       return Array.isArray(list) ? list : [];
     },
-    isLoading() {
-      return this.$store.state.loading;
+    logOutDialog() {
+      return this.$store.getters.getLogOutDialog;
     },
+    userRegionList() {
+      return this.$store.getters.getUserRegionList;
+    },
+    isLoading() {
+      return this.$store.getters.getLoading;
+    }
   },
 }
 
