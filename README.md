@@ -1,13 +1,13 @@
 ## PROJECT Directors Front
 
 
-![di_logo](https://github.com/f-lab-edu/directors/assets/76680394/6580c1fd-efb8-448f-93d5-649717b5e654)
-### 📌[서비스 링크](https://www.directors.run )
-[Directors 백엔드 레포](https://github.com/f-lab-edu/directors)
+
+## 📌[서비스 링크](https://www.directors.run )
+[➡️Directors 백엔드 레포](https://github.com/f-lab-edu/directors)
 
 <BR>
 
-### 직무 탐색을 위한 플랫폼 서비스
+## 직무 탐색을 위한 플랫폼 서비스
 
 ```프로젝트 기간: 2023.01.04 ~```
 
@@ -20,5 +20,5 @@
 
 <BR>
 
-### 기술 스택
+## 기술 스택
 `Vue.js`, `Vuetify.js`  
