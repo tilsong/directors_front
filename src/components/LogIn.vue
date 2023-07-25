@@ -161,10 +161,10 @@
 
 #container {
     display: flex;
-    flex-direction: column; /* Flexbox의 방향을 수직으로 설정 */
-    justify-content: center; /* 세로 중앙 정렬 */
-    align-items: center; /* 가로 중앙 정렬 */
-    height: 100vh; /* 뷰포트의 높이를 100%로 설정 */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 #networkText {
@@ -176,7 +176,7 @@
     font-weight: bold;
 }
 #logInText {
-    margin-bottom: 20px; /* 요소들 사이에 간격을 주기 위한 마진 설정 */
+    margin-bottom: 20px;
     font-size: 30px;
     font-weight: bold;
 }
@@ -272,7 +272,7 @@ export default {
             alert("아이디 중복 검사가 필요합니다.");
             return;
         }
-        // api call.
+        
         const requestData = {
             "userId": this.newUserId,
             "password": this.newPassword,

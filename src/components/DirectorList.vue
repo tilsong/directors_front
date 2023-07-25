@@ -387,7 +387,7 @@ export default {
         this.specialtyValue = null;
       }
       this.$store.dispatch('fetchDirectorList', {
-        "distance": this.distance,
+        "distance": this.distance + 1,
         "property": this.specialtyValue,
         "hasSchedule": this.scheduleValue === "있음" ? true : false,
         "searchText": this.searchText,
