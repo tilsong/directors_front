@@ -128,7 +128,6 @@
       </div>
       <div class="py-3" />
 
-
       <v-row class="d-flex align-center justify-center " cols="8">
         <div class="item-list"  ref="itemList">
           <div v-if="directorList == null || directorList.length == 0">
@@ -327,9 +326,9 @@ export default {
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
-    updateDistance() {
-      this.$store.dispatch('getNearestAddress', this.distance+1);
-      this.fetchNewData();
+    async updateDistance() {
+      await this.$store.dispatch('getNearestAddress', this.distance+1);
+      await this.fetchNewData();
     },
     getRegionCertification() {
       if (navigator.geolocation) {
@@ -368,13 +367,12 @@ export default {
       this.regionDialog = !this.regionDialog;
     },
     moveDirectorPage() {
-      alert('디렉터 상세 페이지”는 준비 중에 있습니다');
+      alert('디렉터 상세 페이지는 준비 중에 있습니다');
     },
     fetchNewData() {
       if (this.specialtyValue === "전체") {
         this.specialtyValue = null;
       }
-
       this.$store.dispatch('fetchNewDirectorList', {
         "distance": this.distance + 1,
         "property": this.specialtyValue,
