@@ -1,4 +1,12 @@
 <template>
+    <div v-if="isLoading" class="loading-overlay">
+        <v-progress-circular
+        indeterminate
+        color="primary"
+        :width="15"
+        :size="150"
+        />
+    </div>
     <v-container class="">
         <!-- 로고, 로그인 인풋, 로그인 버튼, 회원가입 버튼-->
         <div id="container">
@@ -138,6 +146,19 @@
 </template>
   
 <style scoped>
+.loading-overlay {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  z-index: 9999;
+}
+
 #container {
     display: flex;
     flex-direction: column; /* Flexbox의 방향을 수직으로 설정 */
@@ -267,6 +288,9 @@ export default {
     }
   },
   computed: {
+    isLoading() {
+      return this.$store.getters.getLoading;
+    }
   },
 }
 

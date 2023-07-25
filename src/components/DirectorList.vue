@@ -1,4 +1,12 @@
 <template>
+  <div v-if="isLoading" class="loading-overlay">
+    <v-progress-circular
+      indeterminate
+      color="primary"
+      :width="15"
+      :size="150"
+    />
+  </div>
   <v-container class="">
     <v-responsive class="align-center fill-height">
       <h3 class="text-h4 font-weight-bold text-center">디렉터 찾기</h3>
@@ -89,7 +97,7 @@
             </v-card>
           </v-dialog>
         </div>
-        
+
         <div id="filter-list">
           <v-combobox
           size="small"
@@ -149,6 +157,19 @@
 </template>
 
 <style scoped>
+.loading-overlay {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  z-index: 9999;
+}
+
 #loginDialogTitle {
   text-align: center; 
   font-size: 30px;
@@ -395,14 +416,14 @@ export default {
       let list = this.$store.getters.getDirectorList;
       return Array.isArray(list) ? list : [];
     },
-    isLoading() {
-      return this.$store.state.loading;
-    },
     logOutDialog() {
       return this.$store.getters.getLogOutDialog;
     },
     userRegionList() {
       return this.$store.getters.getUserRegionList;
+    },
+    isLoading() {
+      return this.$store.getters.getLoading;
     }
   },
 }

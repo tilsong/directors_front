@@ -162,6 +162,9 @@ const store = createStore({
     },
     getUserRegionList(state) {
       return state.userRegionList;
+    },
+    getLoading(state) {
+      return state.loading;
     }
   },
 });
