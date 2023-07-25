@@ -22,9 +22,6 @@ const store = createStore({
       const list = await setDirectors(data);
       state.directorList = state.directorList.concat(list);
     },
-    async logIn(state, data) {
-      console.log("in mutation ", data);
-    },
     async setlogOutDialog(state) {
       state.logOutDialog = !state.logOutDialog;
     },
@@ -42,9 +39,10 @@ const store = createStore({
       try {
         await apiClient.get(`/user/duplicated/${userId}`);
         alert("사용가능한 아이디입니다.");
+        return true;
       } catch(e) {
         alert("중복된 아이디입니다. ");
-        console.log(e);
+        return false;
       } finally {
         commit('setLoading', false);
       }
@@ -72,7 +70,23 @@ const store = createStore({
         commit('setLoading', false);
       }
     },
+    async signUp({commit, state}, requestData) {
+      if (state.loading) {
+        return;  
+      }
+      commit('setLoading', true);
 
+      try {
+        const response = await apiClient.post('/user/signUp', requestData);
+        console.log(response);
+        alert("회원가입이 성공했습니다.");
+      } catch(e) {
+        alert("회원가입이 실패했습니다. 다시 시도해주세요.");
+        console.log(e);
+      } finally {
+        commit('setLoading', false);
+      }
+    },
     async fetchNewDirectorList({ commit, state}, requestData) {
       if (state.loading) {
         return; 

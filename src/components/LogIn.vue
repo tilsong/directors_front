@@ -20,6 +20,7 @@
                     <v-text-field
                     label="비밀번호"
                     required
+                    :type="'password'"
                     variant="solo"
                     v-model="password"
                     :rules="[rules.passwordRule]"
@@ -90,6 +91,7 @@
                         <v-text-field
                         label="비밀번호"
                         required
+                        :type="'password'"
                         v-model="newPassword"
                         :rules="[rules.newPasswordRule]"
                         />
@@ -171,7 +173,15 @@ export default {
       passwordRule: password => password.length >= 8 || '패스워드는 8글자 이상 입력되어야 합니다.',
       newUserIdRule: newUserId => (newUserId.length >= 8  && newUserId.length <= 20) || '아이디는 8글자 이상, 20글자 이하로 입력되어야 합니다.',
       newPasswordRule: newPassword => (newPassword.length >= 8  && newPassword.length <= 20) || '비밀번호는 8글자 이상, 20글자 이하로 입력되어야 합니다.',
-      nameRule: name => (name.length >= 2  && name.length <= 6) || '이름은 2글자 이상, 6글자 이하로 입력되어야 합니다.',
+      nameRule: name => {
+        const regexp = /^[가-힣 ]+$/;
+
+        if (name.length >= 2  && name.length <= 6 && regexp.test(name)) {
+            return true;
+        } else {
+            return '이름은 2글자 이상, 6글자 이하의 한글과 공백으로 입력되어야 합니다.';
+        }
+      },
       nicknameRule: nickname => (nickname.length >= 8  && nickname.length <= 20) || '닉네임은 8글자 이상, 20글자 이하로 입력되어야 합니다.',
       emailRule: email => {
         const regexp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -242,6 +252,18 @@ export default {
             return;
         }
         // api call.
+        const requestData = {
+            "userId": this.newUserId,
+            "password": this.newPassword,
+            "name": this.name,
+            "nickname": this.nickname,
+            "email": this.email,
+            "phoneNumber": this.phoneNumber,
+        }
+
+        this.$store.dispatch('signUp', requestData);
+
+        this.signUpDialog = false;
     }
   },
   computed: {
