@@ -9,6 +9,8 @@ const store = createStore({
     isLogin: false,
     logOutDialog: false,
     userRegion: null,
+    userRegionList: [],
+    userRegionListDescription: "",
   },
   mutations: {
     setLoading(state, isLoading) {
@@ -26,11 +28,31 @@ const store = createStore({
       state.logOutDialog = !state.logOutDialog;
     },
     async setUserRegion(state, data) {
-      console.log(data);
       state.userRegion = data;
+    },
+    async setUserRegionList(state, data) {
+      console.log(data);
+      state.userRegionList = data;
+      state.userRegionListDescription = data[0].unitAddress + ` 외 ${data.length-1} 곳`;
     },
   },
   actions: {
+    async getNearestAddress({commit, state}, distance) {
+      if (state.loading) {
+        return;  
+      }
+      commit('setLoading', true);
+
+      try {
+        const response = await apiClient.get(`/region/nearestAddress/${distance}`);
+        
+        commit('setUserRegionList', response.data);
+      } catch(e) {
+        console.log(e);
+      } finally {
+        commit('setLoading', false);
+      }
+    },
     async getRegionCertification({commit, state}, position){
       if (state.loading) {
         return;  
@@ -39,7 +61,7 @@ const store = createStore({
 
       try {
         const response = await apiClient.post(`/user/authenticateRegion`, position);
-        console.log(response.data);
+        
         commit('setUserRegion', response.data);
         alert("지역 인증이 완료되었습니다.");
       } catch(e) {

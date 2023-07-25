@@ -300,6 +300,7 @@ export default {
     },
   }),
   mounted() {
+    this.$store.dispatch('getNearestAddress', 1);
     this.fetchNewData();
     window.addEventListener("scroll", this.handleScroll);
   },
