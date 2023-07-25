@@ -8,7 +8,7 @@ const store = createStore({
     loading: false,
     isLogin: false,
     logOutDialog: false,
-    userRegionList: [],
+    userRegion: null,
   },
   mutations: {
     setLoading(state, isLoading) {
@@ -26,10 +26,28 @@ const store = createStore({
       state.logOutDialog = !state.logOutDialog;
     },
     async setUserRegion(state, data) {
-      state.userRegionList = data;
+      console.log(data);
+      state.userRegion = data;
     },
   },
   actions: {
+    async getRegionCertification({commit, state}, position){
+      if (state.loading) {
+        return;  
+      }
+      commit('setLoading', true);
+
+      try {
+        const response = await apiClient.post(`/user/authenticateRegion`, position);
+        console.log(response.data);
+        commit('setUserRegion', response.data);
+        alert("지역 인증이 완료되었습니다.");
+      } catch(e) {
+        console.log(e);
+      } finally {
+        commit('setLoading', false);
+      }
+    },
     async isDuplicateId({commit, state}, userId) {
       if (state.loading) {
         return;  

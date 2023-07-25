@@ -71,7 +71,7 @@
               <v-btn
                 color="green-darken-1"
                 variant="text"
-                @click="regionDialog = false"
+                @click="getRegionCertification"
               >
                 네
               </v-btn>
@@ -307,6 +307,29 @@ export default {
     window.removeEventListener("scroll", this.handleScroll);
   },
   methods: {
+    getRegionCertification() {
+      if (navigator.geolocation) {
+        this.getGeolocation()
+          .then(position => {
+            this.$store.dispatch('getRegionCertification', {
+              "latitude": position.coords.latitude,
+              "longitude": position.coords.longitude,
+            });
+          })
+          .catch(error => {
+            console.log(error);
+            alert("지역 인증이 실패했습니다. \n 해당 지역 혹은 브라우저를 지원하지 않습니다.");
+          })
+      } else { 
+        alert("지역 인증이 실패했습니다. \n 해당 지역 혹은 브라우저를 지원하지 않습니다.");
+      }
+      this.regionDialog = false
+    },
+    getGeolocation() {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+    },
     changeLogOutDialog() {
       this.$store.commit('setlogOutDialog');
     },
