@@ -1,9 +1,10 @@
 ## PROJECT Directors Front
+![di_logo](https://github.com/f-lab-edu/directors/assets/76680394/6580c1fd-efb8-448f-93d5-649717b5e654)
 
 
 
 ## 📌[서비스 링크](https://www.directors.run )
-[➡️Directors 백엔드 레포](https://github.com/f-lab-edu/directors)
+[➡️ Directors 백엔드 레포](https://github.com/f-lab-edu/directors)
 
 <BR>
 
